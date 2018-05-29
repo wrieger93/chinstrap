@@ -105,3 +105,6 @@ where
         }
     }
 }
+
+test_domain!(BTreeSetDomain, btreesetdomain_tests);
+test_bounded_domain!(BTreeSetDomain, btreesetdomain_bounded_tests);
