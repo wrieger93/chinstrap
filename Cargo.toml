@@ -1,0 +1,6 @@
+[package]
+name = "chinstrap"
+version = "0.1.0"
+authors = ["Billy Rieger <williamr@blend.com>"]
+
+[dependencies]
