@@ -1,4 +1,5 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeSet, HashSet};
+use std::hash::Hash;
 use std::iter::FromIterator;
 
 use traits::{Bounded, Domain};
@@ -108,3 +109,66 @@ where
 
 test_domain!(BTreeSetDomain, btreesetdomain_tests);
 test_bounded_domain!(BTreeSetDomain, btreesetdomain_bounded_tests);
+
+pub struct HashSetDomain<T> {
+    values: HashSet<T>,
+}
+
+impl<T> FromIterator<T> for HashSetDomain<T>
+where
+    T: Eq + Hash,
+{
+    fn from_iter<I>(iter: I) -> HashSetDomain<T>
+    where
+        I: IntoIterator<Item = T>,
+    {
+        HashSetDomain {
+            values: HashSet::from_iter(iter),
+        }
+    }
+}
+
+impl<T> Domain for HashSetDomain<T>
+where
+    T: Clone + Eq + Hash,
+{
+    type Value = T;
+
+    fn size(&self) -> usize {
+        self.values.len()
+    }
+
+    fn contains(&self, value: &Self::Value) -> bool {
+        self.values.contains(value)
+    }
+
+    fn assign(&mut self, value: &Self::Value) -> Result<(), ()> {
+        if self.values.len() == 0 {
+            Ok(())
+        } else {
+            if let Some(taken_value) = self.values.take(value) {
+                self.values.clear();
+                self.values.insert(taken_value);
+                Ok(())
+            } else {
+                self.values.clear();
+                Err(())
+            }
+        }
+    }
+
+    fn remove(&mut self, value: &Self::Value) -> Result<(), ()> {
+        if self.values.len() == 0 {
+            Ok(())
+        } else {
+            self.values.remove(value);
+            if self.values.len() == 0 {
+                Err(())
+            } else {
+                Ok(())
+            }
+        }
+    }
+}
+
+test_domain!(HashSetDomain, hashsetdomain_tests);
